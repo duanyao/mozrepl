@@ -126,6 +126,16 @@ function onSocketAccepted(serv, transport) {
         .getMostRecentWindow(typeof(contextWindowType) !== 'undefined' ?
                              contextWindowType : pref.getCharPref('startingContext'));
 
+    //In geckofx, nsIWindowMediator contains no window, so we have to query nsIWindowWatcher
+    if(context === null) {
+        var windowWatcher = Cc['@mozilla.org/embedcomp/window-watcher;1']
+            .getService(Ci.nsIWindowWatcher);
+        var windows = windowWatcher.getWindowEnumerator();
+        while (windows.hasMoreElements()) {
+          context = windows.getNext().QueryInterface(Ci.nsIDOMWindow);
+        }
+    }
+
     if(context === null) {
         context = Cc["@mozilla.org/appshell/appShellService;1"]
             .getService(Ci.nsIAppShellService)
